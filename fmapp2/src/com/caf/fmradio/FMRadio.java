@@ -193,6 +193,7 @@ public class FMRadio extends Activity
 
    private IFMRadioService mService = null;
    private FmSharedPreferences mPrefs;
+   private AudioManager mAudioManager;
 
    /* Button Resources */
    private ImageView mOnOffButton;
@@ -287,6 +288,8 @@ public class FMRadio extends Activity
    public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setVolumeControlStream(AudioManager.STREAM_MUSIC);
+      mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
       mPrefs = new FmSharedPreferences(this);
       mCommandActive = CMD_NONE;
       mCommandFailed = CMD_NONE;
@@ -1666,6 +1669,9 @@ public class FMRadio extends Activity
             }
 
             if((false == mService.isFmOn()) && isAntennaAvailable()) {
+                mAudioManager.setParameters("fm_mode=on;fm_radio_mute=0;fm_radio_volume=on;FMRadioVol=0.1496235728");
+                mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+                mAudioManager.setSpeakerphoneOn(false);
                 bStatus = mService.fmOn();
                 if(bStatus) {
                    tuneRadio(FmSharedPreferences.getTunedFrequency());
@@ -1702,6 +1708,7 @@ public class FMRadio extends Activity
       if(mService != null) {
          try {
             bStatus = mService.fmOff();
+            mAudioManager.setParameters("fm_mode=off;fm_radio_mute=1");
             if (bStatus == false) {
                 mCommandFailed = CMD_FMOFF;
                 Log.e(LOGTAG, " mService.fmOff failed");

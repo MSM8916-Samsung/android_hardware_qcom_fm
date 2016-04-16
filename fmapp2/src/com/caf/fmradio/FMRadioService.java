@@ -2359,6 +2359,7 @@ public class FMRadioService extends Service
        if (isCallActive())
            return;
 
+       AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
        mSpeakerPhoneOn = speakerOn;
 
        if (speakerOn == false) {
@@ -2368,9 +2369,13 @@ public class FMRadioService extends Service
             } else {
                 Log.d(LOGTAG, "A2DP is not connected, force none");
                 AudioSystem.setForceUse(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_NONE);
+                audioManager.setMode(AudioManager.MODE_IN_CALL);
+                audioManager.setSpeakerphoneOn(false);
             }
        } else if (speakerOn == true) {
            Log.d(LOGTAG, "enabling speaker");
+           audioManager.setMode(AudioManager.MODE_IN_CALL);
+           audioManager.setSpeakerphoneOn(true);
            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_SPEAKER);
        }
 
@@ -2472,6 +2477,7 @@ public class FMRadioService extends Service
       {
          mMuted = true;
          audioManager.setParameters("fm_mute=1");
+         audioManager.setParameters("fm_radio_mute=1");
          if (mAudioTrack != null)
              mAudioTrack.setVolume(0.0f);
       }
@@ -2494,6 +2500,7 @@ public class FMRadioService extends Service
       {
          mMuted = false;
          audioManager.setParameters("fm_mute=0");
+         audioManager.setParameters("fm_radio_mute=0");
          if (mAudioTrack != null)
              mAudioTrack.setVolume(1.0f);
          if (mResumeAfterCall)
