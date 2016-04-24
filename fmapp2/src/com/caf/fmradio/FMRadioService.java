@@ -974,7 +974,8 @@ public class FMRadioService extends Service
                     if (isFmOn() && getResources()
                             .getBoolean(R.bool.def_headset_next_enabled)) {
                         try {
-                            mCallbacks.onSeekNextStation();
+                            if ((mServiceInUse) && (mCallbacks != null))
+                                mCallbacks.onSeekNextStation();
                         }catch (RemoteException e) {
                         }
                     }
@@ -1069,11 +1070,17 @@ public class FMRadioService extends Service
                Log.d(LOGTAG, "Audio source set it as headset");
                AudioSystem.setForceUse(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_NONE);
            }
+       } else {
+               Log.d(LOGTAG, "A2DP is connected, set audio source to A2DP HS");
+               AudioSystem.setForceUse(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_SPEAKER);
+               mSpeakerPhoneOn = true;
        }
+
        mPlaybackInProgress = true;
        configureAudioDataPath(true);
        try {
-           mCallbacks.onFmAudioPathStarted();
+           if ((mServiceInUse) && (mCallbacks != null))
+               mCallbacks.onFmAudioPathStarted();
        } catch(RemoteException e) {
            e.printStackTrace();
        }
@@ -1084,7 +1091,8 @@ public class FMRadioService extends Service
        configureAudioDataPath(false);
        mPlaybackInProgress = false;
        try {
-           mCallbacks.onFmAudioPathStopped();
+           if ((mServiceInUse) && (mCallbacks != null))
+               mCallbacks.onFmAudioPathStopped();
        } catch(RemoteException e) {
            e.printStackTrace();
        }
